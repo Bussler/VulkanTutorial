@@ -30,7 +30,7 @@ namespace CustomVulkanUtils {
 
 		int i = 0;
 		for (const auto& queueFamily : queueFamilies) {
-			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) { // find atleast one queue family that supports VK_QUEUE_GRAPHICS_BIT
+			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) { // find atleast one queue family that supports VK_QUEUE_GRAPHICS_BIT (graphics capabilities)
 				indices.graphicsFamily = i;
 			}
 
@@ -139,6 +139,54 @@ namespace CustomVulkanUtils {
 		}
 
 		return physicalDevice;
+	}
+
+
+	VkDevice createLogicalDevice(VkPhysicalDevice physicalDevice, bool enableValidationLayers, std::vector<const char*> validationLayers, VkQueue& graphicsQueue) {
+
+		VkDevice device;
+
+		// specifying used queues: we only care about the graphic functionalities here (probe for VK_QUEUE_GRAPHICS_BIT in findQueueFamilies) 
+		QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+
+		VkDeviceQueueCreateInfo queueCreateInfo{};
+		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+		queueCreateInfo.queueCount = 1;
+
+		float queuePriority = 1.0f;
+		queueCreateInfo.pQueuePriorities = &queuePriority;
+
+		// needed device features, like geometry shaders
+		VkPhysicalDeviceFeatures deviceFeatures{};
+
+
+		// fill main creatInfo structure with previous 2 structs
+		VkDeviceCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+
+		createInfo.pQueueCreateInfos = &queueCreateInfo;
+		createInfo.queueCreateInfoCount = 1;
+
+		createInfo.pEnabledFeatures = &deviceFeatures;
+		createInfo.enabledExtensionCount = 0;
+
+		if (enableValidationLayers) {
+			createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+			createInfo.ppEnabledLayerNames = validationLayers.data();
+		}
+		else {
+			createInfo.enabledLayerCount = 0;
+		}
+
+		if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create logical device!");
+		}
+
+		//retrieve queue handles
+		vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
+
+		return device;
 	}
 
 }

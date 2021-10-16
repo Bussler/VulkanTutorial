@@ -35,6 +35,9 @@ private:
     CustomVulkanUtils::CustomValidationLayer validationLayerManager;
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 
+    VkDevice device; // logical device
+    VkQueue graphicsQueue; // handle to the logical queue
+
 
     // validation layers for debugging
     const std::vector<const char*> validationLayers = {
@@ -67,6 +70,7 @@ private:
         }
         
         physicalDevice = CustomVulkanUtils::pickPhysicalDevice(instance);
+        device = CustomVulkanUtils::createLogicalDevice(physicalDevice, enableValidationLayers, validationLayers, graphicsQueue);
     }
 
     void mainLoop() {
@@ -82,6 +86,8 @@ private:
         if (enableValidationLayers) {
             validationLayerManager.cleanup();
         }
+
+        vkDestroyDevice(device, nullptr);
 
         vkDestroyInstance(instance, nullptr);
 
