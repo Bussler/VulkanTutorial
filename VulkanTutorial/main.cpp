@@ -8,7 +8,7 @@
 #include <cstring>
 
 #include "CustomValidationLayer.h"
-
+#include "PhysicalDeviceUtils.h"
 
 class HelloTriangleApplication {
 public:
@@ -33,6 +33,7 @@ private:
 
     VkInstance instance;
     CustomVulkanUtils::CustomValidationLayer validationLayerManager;
+    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 
 
     // validation layers for debugging
@@ -65,6 +66,7 @@ private:
             validationLayerManager.setupDebugMessenger();
         }
         
+        physicalDevice = CustomVulkanUtils::pickPhysicalDevice(instance);
     }
 
     void mainLoop() {

@@ -23,5 +23,8 @@
     <ClInclude Include="CustomValidationLayer.h">
       <Filter>Quelldateien</Filter>
     </ClInclude>
+    <ClInclude Include="PhysicalDeviceUtils.h">
+      <Filter>Quelldateien</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
