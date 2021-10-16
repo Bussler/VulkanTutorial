@@ -5,8 +5,45 @@
 #include <cstdlib>
 #include <vector>
 #include <map>
+#include <optional> //wrapper that contains no value until we assign something. Can be queried with "has_value()" member function.
 
 namespace CustomVulkanUtils {
+
+	struct QueueFamilyIndices {
+		std::optional<uint32_t> graphicsFamily;
+
+		bool isComplete() { // check if the value is set and we thus support the wanted commands
+			return graphicsFamily.has_value();
+		}
+	};
+
+	// check which queue families are supported by the device
+	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) {
+		QueueFamilyIndices indices;
+
+		// Logic to find queue family indices to populate struct with
+		uint32_t queueFamilyCount = 0;
+		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+		std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+		int i = 0;
+		for (const auto& queueFamily : queueFamilies) {
+			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) { // find atleast one queue family that supports VK_QUEUE_GRAPHICS_BIT
+				indices.graphicsFamily = i;
+			}
+
+			if (indices.isComplete()) {
+				break;
+			}
+
+			i++;
+		}
+
+		return indices;
+	}
+
 
 	// check physical devices (graphics cards) for compatabilities with our requirements
 	bool isDeviceSuitable(VkPhysicalDevice device) {
@@ -26,7 +63,7 @@ namespace CustomVulkanUtils {
 	// function to return a score of a graphics card with respect to the options it supports
 	int rateDeviceSuitability(VkPhysicalDevice device) {
 		
-		// query for device details
+		// Query for device details
 		VkPhysicalDeviceProperties deviceProperties;
 		vkGetPhysicalDeviceProperties(device, &deviceProperties);
 
@@ -45,6 +82,12 @@ namespace CustomVulkanUtils {
 
 		// Application can't function without geometry shaders
 		if (!deviceFeatures.geometryShader) {
+			return 0;
+		}
+
+		// Ensure the device can process the commands (with its supported queue families) we want to use
+		QueueFamilyIndices indices = findQueueFamilies(device);
+		if (!indices.isComplete()) {
 			return 0;
 		}
 
