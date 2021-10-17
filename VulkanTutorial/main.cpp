@@ -37,7 +37,9 @@ private:
 
     VkDevice device; // logical device
     VkQueue graphicsQueue; // handle to the logical queue
+    VkQueue presentQueue; // handle to the presentation queue between vulkan and windows system
 
+    VkSurfaceKHR surface; // connection between vulkan and window system
 
     // validation layers for debugging
     const std::vector<const char*> validationLayers = {
@@ -68,9 +70,11 @@ private:
             validationLayerManager = CustomVulkanUtils::CustomValidationLayer(instance);
             validationLayerManager.setupDebugMessenger();
         }
+
+        createSurface();
         
-        physicalDevice = CustomVulkanUtils::pickPhysicalDevice(instance);
-        device = CustomVulkanUtils::createLogicalDevice(physicalDevice, enableValidationLayers, validationLayers, graphicsQueue);
+        physicalDevice = CustomVulkanUtils::pickPhysicalDevice(instance, surface);
+        device = CustomVulkanUtils::createLogicalDevice(physicalDevice, surface, enableValidationLayers, validationLayers, graphicsQueue, presentQueue);
     }
 
     void mainLoop() {
@@ -88,6 +92,8 @@ private:
         }
 
         vkDestroyDevice(device, nullptr);
+
+        vkDestroySurfaceKHR(instance, surface, nullptr);
 
         vkDestroyInstance(instance, nullptr);
 
@@ -153,6 +159,12 @@ private:
         // create vulkan instance with specified information and store in private variable
         if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create instance!");
+        }
+    }
+
+    void createSurface() {
+        if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create window surface!");
         }
     }
 
