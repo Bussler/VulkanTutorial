@@ -41,9 +41,19 @@ private:
 
     VkSurfaceKHR surface; // connection between vulkan and window system
 
+    VkSwapchainKHR swapChain; // swap chain that holds rendered images and/ or presents them on screen
+    std::vector<VkImage> swapChainImages; // handles of images inside swapChain
+    VkFormat swapChainImageFormat; // surface format of the swapChain
+    VkExtent2D swapChainExtent; // extent (size of images in pixels) of swapChain
+
     // validation layers for debugging
     const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
+    };
+
+    // needed extensions for the graphics card
+    const std::vector<const char*> deviceExtensions = {
+    VK_KHR_SWAPCHAIN_EXTENSION_NAME
     };
 
 #ifdef NDEBUG
@@ -73,8 +83,9 @@ private:
 
         createSurface();
         
-        physicalDevice = CustomVulkanUtils::pickPhysicalDevice(instance, surface);
-        device = CustomVulkanUtils::createLogicalDevice(physicalDevice, surface, enableValidationLayers, validationLayers, graphicsQueue, presentQueue);
+        physicalDevice = CustomVulkanUtils::pickPhysicalDevice(instance, surface, deviceExtensions);
+        device = CustomVulkanUtils::createLogicalDevice(physicalDevice, surface, enableValidationLayers, validationLayers, graphicsQueue, presentQueue, deviceExtensions);
+        swapChain = CustomVulkanUtils::createSwapChain(swapChainImages, swapChainImageFormat, swapChainExtent, window, physicalDevice, device, surface);
     }
 
     void mainLoop() {
@@ -90,6 +101,8 @@ private:
         if (enableValidationLayers) {
             validationLayerManager.cleanup();
         }
+
+        vkDestroySwapchainKHR(device, swapChain, nullptr);
 
         vkDestroyDevice(device, nullptr);
 
