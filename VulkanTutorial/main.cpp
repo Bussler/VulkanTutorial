@@ -46,6 +46,8 @@ private:
     VkFormat swapChainImageFormat; // surface format of the swapChain
     VkExtent2D swapChainExtent; // extent (size of images in pixels) of swapChain
 
+	std::vector<VkImageView> swapChainImageViews; // imageViews that describe how to access the image (2D with Depth or 3D...)
+
     // validation layers for debugging
     const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
@@ -86,6 +88,7 @@ private:
         physicalDevice = CustomVulkanUtils::pickPhysicalDevice(instance, surface, deviceExtensions);
         device = CustomVulkanUtils::createLogicalDevice(physicalDevice, surface, enableValidationLayers, validationLayers, graphicsQueue, presentQueue, deviceExtensions);
         swapChain = CustomVulkanUtils::createSwapChain(swapChainImages, swapChainImageFormat, swapChainExtent, window, physicalDevice, device, surface);
+		CustomVulkanUtils::createImageViews(swapChainImageViews, swapChainImages, swapChainImageFormat, device);
     }
 
     void mainLoop() {
@@ -101,6 +104,10 @@ private:
         if (enableValidationLayers) {
             validationLayerManager.cleanup();
         }
+
+		for (auto imageView : swapChainImageViews) {
+			vkDestroyImageView(device, imageView, nullptr);
+		}
 
         vkDestroySwapchainKHR(device, swapChain, nullptr);
 
