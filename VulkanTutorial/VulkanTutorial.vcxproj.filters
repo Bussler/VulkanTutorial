@@ -26,5 +26,22 @@
     <ClInclude Include="PhysicalDeviceUtils.h">
       <Filter>Quelldateien</Filter>
     </ClInclude>
+    <ClInclude Include="GraphicsPipelineUtils.h">
+      <Filter>Quelldateien</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanShaderUtils.h">
+      <Filter>Quelldateien</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\shader.vert">
+      <Filter>Quelldateien</Filter>
+    </None>
+    <None Include="shaders\shader.frag">
+      <Filter>Quelldateien</Filter>
+    </None>
+    <None Include="shaders\compile.bat">
+      <Filter>Quelldateien</Filter>
+    </None>
   </ItemGroup>
 </Project>

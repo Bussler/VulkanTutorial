@@ -9,6 +9,7 @@
 
 #include "CustomValidationLayer.h"
 #include "PhysicalDeviceUtils.h"
+#include "GraphicsPipelineUtils.h"
 
 class HelloTriangleApplication {
 public:
@@ -89,6 +90,8 @@ private:
         device = CustomVulkanUtils::createLogicalDevice(physicalDevice, surface, enableValidationLayers, validationLayers, graphicsQueue, presentQueue, deviceExtensions);
         swapChain = CustomVulkanUtils::createSwapChain(swapChainImages, swapChainImageFormat, swapChainExtent, window, physicalDevice, device, surface);
 		CustomVulkanUtils::createImageViews(swapChainImageViews, swapChainImages, swapChainImageFormat, device);
+
+		CustomVulkanUtils::createGraphicsPipeline(device);
     }
 
     void mainLoop() {
